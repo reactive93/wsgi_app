@@ -2,15 +2,15 @@
 from io import BytesIO
 from midleware import MidleWare
 from base_handler import BaseHandler
+
 class RequestWrapper:
 
-    def __init__(self, request_method:str, path:str, query_path:str, post_fn):
+    def __init__(self, request_method:str, path:str, query:dict, post_data:dict):
         self.request_method = request_method
         self.path = path
-        self.query_path = query_path
-        self.post_fn = post_fn
+        self.query = query
         self.handler = None #type:BaseHandler
-        self.post_data = None
+        self.post_data = post_data
 
         pass
     
@@ -24,24 +24,24 @@ class Dispatcher:
 
         pass
 
-    def parse_query(self, raw_data:str):
-        pass
+    def parse_query(self, raw_data:str)->dict:
+        return {}
 
-    def parse_post_data(self, raw_data):
-        pass
+    def parse_post_data(self, raw_data)->dict:
+        return {}
 
-    def read_post(self,method:str,post_fn):
+    def read_post(self,method:str, post_fn:BytesIO):
         if method.lower() == 'post':
-            raw_data = post_fn().read()
+            raw_data = post_fn.read()
             return self.parse_post_data(raw_data)
-        return ''
+        return {}
 
 
     def read_query_url(self, query_path:str):
         if query_path != '':
             return self.parse_query(query_path)
         
-        return query_path
+        return {}
     
     def get_request_wrapper(self):
         
@@ -50,14 +50,22 @@ class Dispatcher:
         query_path = self.environ['QUERY_STRING']
         post_fn = self.environ['wsgi.input']
 
+        
         parsed_query_path = self.read_query_url(query_path)
-        parsed_query_path = self.read_post(method,post_fn)
 
-        requestWrapper = RequestWrapper(method, path, query_path, post_fn)
+        parsed_post_data = self.read_post(method,post_fn)
+
+        requestWrapper = RequestWrapper(method, path, parsed_query_path, parsed_post_data)
 
         return requestWrapper
 
+    
+
     def get_handler(self):
+        requestWrapper = self.get_request_wrapper()
+
+        
+
         pass
 
     def get_response(self):

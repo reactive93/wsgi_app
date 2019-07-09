@@ -17,7 +17,7 @@ class Url:
         self.paramsUrl = [] #type: List[ParamUrl]
         self.split_url = None #type:List[str]
         self.parse_url(path)
-
+        self.is_static = True
     def parse_url(self, path:str):
 
         self.split_url = path.rsplit('/')
@@ -34,7 +34,8 @@ class Url:
                 else:
                     raise Exception('Can not parse path ---> '+ path)
 
-
+        if len(self.paramsUrl)>1:
+            self.is_static = False
         pass
 
 url = Url('/api/test/id<int>/question/id<int>',None)
