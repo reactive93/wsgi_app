@@ -1,6 +1,6 @@
 from typing import List
 
-from base_handler import BaseHandler
+from .base_handler import BaseHandler
 
 class ParamUrl:
     def __init__(self,name_param:str,type:str ,position:int):
@@ -38,6 +38,6 @@ class Url:
             self.is_static = False
         pass
 
-url = Url('/api/test/id<int>/question/id<int>',None)
-url = Url('/api/test/id<int>/question/',None)
-url = Url('/api/test/question/',None)
+# url = Url('/api/test/id<int>/question/id<int>', None)
+# url = Url('/api/test/id<int>/question/', None)
+# url = Url('/api/test/question/', None)

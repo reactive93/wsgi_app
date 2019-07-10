@@ -1,0 +1,13 @@
+{
+    "include": [
+        "C:\\Users\\a.korynov\\Documents\\VSCode\\python\\wsgi_app\\web"
+    ],
+    "strict": ["C:\\Users\\a.korynov\\Documents\\VSCode\\python\\wsgi_app"],
+    
+    "executionEnvironments": [
+        {
+            "root": "C:\\Users\\a.korynov\\Documents\\VSCode\\python\\wsgi_app",
+            "extraPaths": ["C:\\Users\\a.korynov\\Documents\\VSCode\\python\\wsgi_app"]
+        }
+    ]
+}

@@ -1,7 +1,7 @@
 
 from io import BytesIO
-from midleware import MidleWare
-from base_handler import BaseHandler
+from .midleware import MidleWare
+from .base_handler import BaseHandler
 
 class RequestWrapper:
 
@@ -30,7 +30,7 @@ class Dispatcher:
     def parse_post_data(self, raw_data)->dict:
         return {}
 
-    def read_post(self,method:str, post_fn:BytesIO):
+    def read_post(self, method:str, post_fn:BytesIO):
         if method.lower() == 'post':
             raw_data = post_fn.read()
             return self.parse_post_data(raw_data)
