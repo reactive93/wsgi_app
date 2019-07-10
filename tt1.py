@@ -3,9 +3,9 @@ from web.application import Application
 
 
 urls = [
-    Url('/', None),
     Url('/about', None),
     Url('/api/test/id<int>/question/id<int>', None),
+    Url('/', None),
     Url('/api/test/id<int>/question/id<int>/create', None)
 ]
 

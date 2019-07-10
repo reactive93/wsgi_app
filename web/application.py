@@ -1,7 +1,7 @@
 from typing import List, Set
 from .url import Url, ParamUrl
 from .dispatcher import Dispatcher
-
+import queue
 class UrlItem:
     
     def __init__(self,part_path:str,is_static:bool):
@@ -12,9 +12,13 @@ class UrlItem:
 class UrlTree:
 
     def __init__(self):
-        self.part_path= None #type:UrlItem
+        self.part_path= ''
         self.array_item_url = [] #type: List[UrlTree]
         self.handler = None
+        self.name_param = None
+        self.type = None
+        self.position = None
+        self.is_dynamic=False
         pass
 
 class Application:
@@ -28,31 +32,60 @@ class Application:
         self.parse_url()
         pass
     
-    def parse_dynamic_url(self, path:str):
+    def parse_dynamic_url(self, path:str, pos:int):
         
-        for i,item in enumerate(self.split_url):
-            if '<' in item:
-                if '<' in item and '>' in item:
-                    prepare_item = item.replace('>','',len(item)-1)
-                    name_type_list_param = prepare_item.rsplit('<')
-                    paramUrl = ParamUrl(name_type_list_param[0],name_type_list_param[1],i)
-                    return paramUrl
 
-                
-                else:
-                    raise Exception('Can not parse path ---> '+ path)
+        if '<' in path and '>' in path:
+            prepare_item = path.replace('>','',len(path)-1)
+            name_type_list_param = prepare_item.rsplit('<')
+            # paramUrl = ParamUrl(name_type_list_param[0],name_type_list_param[1], pos)
+            paramUrl = UrlTree()
+            paramUrl.name_param = name_type_list_param[0]
+            paramUrl.type = name_type_list_param[1]
+            paramUrl.position = pos
+            paramUrl.is_dynamic = True
+            return paramUrl
+
+        
+        else:
+            raise Exception('Can not parse path ---> '+ path)
 
     def parse_url(self):
         
         for i, url in enumerate(self.urls):
             current_tree = self.tree
-            path_arr = url.path.rsplit('/')
-            for j, part in enumerate(path_arr):
-                
-                if part in current_tree.array_item_url[j].part_path:
-                    
+            path_arr = url.path.split('/') 
+            path_arr[0] = '/'
 
-                    pass
+            for j, part in enumerate(path_arr):
+
+                if '<' in part:
+                    dynamic = self.parse_dynamic_url(part, j)
+                    current_tree.array_item_url.append(dynamic)
+                    continue
+                if current_tree.part_path =='':
+                    current_tree.part_path = part
+                    continue
+                else:
+                    if len(current_tree.array_item_url)==0:
+                        new_part = UrlTree()
+                        new_part.part_path = part
+                        current_tree.array_item_url.append(new_part)
+                        if j>2:
+                            current_tree = new_part
+                        continue
+
+                    else:
+                        if part == '/':
+                            continue
+                        for k, item in enumerate(current_tree.array_item_url):
+                            if part == item.part_path:
+                                current_tree = item
+                                break
+                        new_part = UrlTree()
+                        new_part.part_path = part
+                        current_tree.array_item_url.append(new_part)
+                        current_tree = new_part
 
 
     def work(self, environ, start_response_fn):
