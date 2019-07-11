@@ -12,7 +12,7 @@ class UrlItem:
 class UrlTree:
 
     def __init__(self):
-        self.part_path= ''
+        self.part_path= '/'
         self.array_item_url = [] #type: List[UrlTree]
         self.handler = None
         self.name_param = None
@@ -50,42 +50,58 @@ class Application:
         else:
             raise Exception('Can not parse path ---> '+ path)
 
+    def path_exist(self,array:List[UrlTree], part:str):
+        for i, url_tree in enumerate(array):
+            if part == url_tree.part_path:
+                return url_tree
+        return None
+
+    def get_dynamic_part_url(self, arr:List[UrlTree], current_dynamic:UrlTree):
+        temp_url = None #type:UrlTree
+        for url in arr:
+            if url.is_dynamic:
+                temp_url = url
+                break
+        if temp_url.type == current_dynamic.type:
+            return temp_url
+        
+        return None
+        
+
     def parse_url(self):
         
         for i, url in enumerate(self.urls):
             current_tree = self.tree
             path_arr = url.path.split('/') 
-            path_arr[0] = '/'
+            del path_arr[0]
 
             for j, part in enumerate(path_arr):
-
+                if part == '':
+                    current_tree.handler = url.handler
+                    continue
                 if '<' in part:
                     dynamic = self.parse_dynamic_url(part, j)
+                    if j == len(path_arr)-1:
+                        dynamic.handler = url.handler
+                    if len(current_tree.array_item_url) > 0:
+                        exist_dynamic = self.get_dynamic_part_url(current_tree.array_item_url, dynamic)
+                        if exist_dynamic:
+                            current_tree = exist_dynamic
+                            continue
                     current_tree.array_item_url.append(dynamic)
-                    continue
-                if current_tree.part_path =='':
-                    current_tree.part_path = part
+                    current_tree = dynamic
                     continue
                 else:
-                    if len(current_tree.array_item_url)==0:
+                    part_tree = self.path_exist(current_tree.array_item_url, part)
+                    if part_tree is None:
                         new_part = UrlTree()
                         new_part.part_path = part
-                        current_tree.array_item_url.append(new_part)
-                        if j>2:
-                            current_tree = new_part
-                        continue
-
-                    else:
-                        if part == '/':
-                            continue
-                        for k, item in enumerate(current_tree.array_item_url):
-                            if part == item.part_path:
-                                current_tree = item
-                                break
-                        new_part = UrlTree()
-                        new_part.part_path = part
+                        if j == len(path_arr)-1:
+                            new_part.handler = url.handler
                         current_tree.array_item_url.append(new_part)
                         current_tree = new_part
+                    else:
+                        current_tree = part_tree
 
 
     def work(self, environ, start_response_fn):
