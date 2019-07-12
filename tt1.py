@@ -14,5 +14,3 @@ urls = [
 
 app = Application(urls, None)
 app.configure()
-
-

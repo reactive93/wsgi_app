@@ -1,13 +1,6 @@
 from typing import List, Set
 from .url import Url, ParamUrl
 from .dispatcher import Dispatcher
-import queue
-class UrlItem:
-    
-    def __init__(self,part_path:str,is_static:bool):
-        self.part_path = part_path
-        self.is_static = is_static
-
 
 class UrlTree:
 
@@ -110,7 +103,7 @@ class Application:
         # response_headers = [('Content-type', 'text/plain')]
         # start_response(status, response_headers)
         print(environ)
-        dispatcher = Dispatcher(environ, start_response_fn)
+        dispatcher = Dispatcher(environ, start_response_fn, self.tree)
         status = dispatcher.get_response().get_status()
         headers = dispatcher.get_response().get_headers()
         data = dispatcher.get_response().get_data()

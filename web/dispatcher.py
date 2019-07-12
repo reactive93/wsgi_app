@@ -1,8 +1,8 @@
-
+from typing import List
 from io import BytesIO
 from .midleware import MidleWare
 from .base_handler import BaseHandler
-
+from .parser import ParserUrl,UrlTree
 class RequestWrapper:
 
     def __init__(self, request_method:str, path:str, query:dict, post_data:dict):
@@ -11,17 +11,17 @@ class RequestWrapper:
         self.query = query
         self.handler = None #type:BaseHandler
         self.post_data = post_data
-
+        
         pass
     
 
 class Dispatcher:
 
-    def __init__(self, environ:dict, start_response_fn):
+    def __init__(self, environ:dict, start_response_fn, tree:UrlTree):
 
         self.environ = environ
-        
-
+        self.tree = tree
+        self.parser_url = ParserUrl()
         pass
 
     def parse_query(self, raw_data:str)->dict:
@@ -59,10 +59,38 @@ class Dispatcher:
 
         return requestWrapper
 
-    
+    def path_exist(self, array:List[UrlTree], part:str, pos:int):
+        for i, url_tree in enumerate(array):
+            if part == url_tree.part_path:
+                return url_tree
+            if url_tree.position == pos:
+                return url_tree
+        return None
+
+    def find_handler(self, main_tree:UrlTree, path:str):
+        
+        array_path = path.split('/')
+        del array_path[0]
+        for j, part in enumerate(array_path):
+            if part == '':
+                return main_tree.handler
+
+            else:
+                part_tree = self.path_exist(main_tree.array_item_url, part, j)
+                if part_tree is None:
+                    return None
+                    
+                if j == len(array_path)-1:
+                    return main_tree.handler
+                else:
+                    main_tree = part_tree
+        
 
     def get_handler(self):
         requestWrapper = self.get_request_wrapper()
+
+        tree_path = self.parser_url.parse_url(requestWrapper.path)
+
 
         
 
